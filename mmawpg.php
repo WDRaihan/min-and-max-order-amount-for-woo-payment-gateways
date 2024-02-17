@@ -3,9 +3,8 @@
 Plugin Name: Min and Max Order Amount for Woo Payment Gateways
 Plugin URI: https://mmawpg.wdraihan.com/
 Description: Add minimum or maximum order amount to restricting/disable checkout/place order button based on WooCommerce payment gateways.
-Version: 1.0.0
-Author: WDRaihan
-Author URI: https://wdraihan.com
+Version: 1.0.2
+Author: Raihan
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Text Domain: mmawpg

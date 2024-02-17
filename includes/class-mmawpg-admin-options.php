@@ -9,6 +9,7 @@ class MMAWPG_Lite_Settings_Tab {
         add_filter( 'woocommerce_settings_tabs_array', __CLASS__ . '::add_settings_tab', 50 );
         add_action( 'woocommerce_settings_tabs_mmawpg_settings_tab', __CLASS__ . '::settings_tab' );
         add_action( 'woocommerce_update_options_mmawpg_settings_tab', __CLASS__ . '::update_settings' );
+        add_filter( 'mmawpg_wc_settings_tab', __CLASS__ . '::installed_payment_methods', 10 );
     }
     
     /**
@@ -81,6 +82,15 @@ class MMAWPG_Lite_Settings_Tab {
                 'type' => 'checkbox',
                 'desc' => esc_html__( 'Enable to display the last required order amount. Example: (Min amount - Cart total).', 'mmawpg' ),
                 'id'   => 'mmawpg_calc_cart'
+            ),
+            'mmawpg_section_end' => array(
+                 'type' => 'sectionend',
+                 'id' => 'mmawpg_section_end_settings'
+            ),
+            'mmawpg_method_section_title' => array(
+                'name'     => esc_html__( 'Set min & max order amounts based on payment gateways', 'mmawpg' ),
+                'type'     => 'title',
+                'id'       => 'mmawpg_method_section_title_settings'
             ),
             'mmawpg_cod_min' => array(
                 'name' => esc_html__( 'Cash on delivery', 'mmawpg' ),
@@ -167,7 +177,7 @@ class MMAWPG_Lite_Settings_Tab {
                 'placeholder' => '0',
             ),
             'mmawpg_stripe_min' => array(
-                'name' => esc_html__( 'Stripe(Pro feature)', 'mmawpg' ),
+                'name' => esc_html__( 'Stripe (Pro)', 'mmawpg' ),
                 'type' => 'number',
                 'desc' => esc_html__( 'Min amount', 'mmawpg' ),
                 'custom_attributes'	=> array(
@@ -187,13 +197,67 @@ class MMAWPG_Lite_Settings_Tab {
                 'default' => '0',
                 'placeholder' => '0',
             ),
-            'mmawpg_section_end' => array(
+            /*'mmawpg_section_end' => array(
                  'type' => 'sectionend',
                  'id' => 'mmawpg_section_end_settings'
-            )
+            )*/
         );
 
         return apply_filters( 'mmawpg_wc_settings_tab', $mmawpg_settings_array );
+    }
+
+    public static function installed_payment_methods($mmawpg_settings_array){
+        $available_payment_methods = WC()->payment_gateways()->get_available_payment_gateways();
+
+        unset($available_payment_methods['cod']);
+        unset($available_payment_methods['bacs']);
+        unset($available_payment_methods['cheque']);
+        unset($available_payment_methods['paypal']);
+        unset($available_payment_methods['stripe']);
+
+        foreach($available_payment_methods as $method_id=>$available_method){
+
+            //$method_id = ($method_id == 'bacs') ? 'bank' : $method_id;
+
+            $method_title = $available_method->title;
+
+            /*if($method_id != 'bacs' || $method_id == 'cheque' || $method_id == 'paypal' || $method_id == 'stripe'){
+                break;
+            }*/
+
+            $mmawpg_settings_array['mmawpg_'.$method_id.'_min'] = array(
+                'name' => esc_html__( $method_title.' (Pro)', 'mmawpg' ),
+                'type' => 'number',
+                'desc' => esc_html__( 'Min amount', 'mmawpg' ),
+                //'id'   => 'mmawpg_'.$method_id.'_min',
+                'custom_attributes' => array(
+                    'min'   => '0',
+                    'disabled'=> 'disabled'
+                ),
+                'default' => '0',
+                'placeholder' => '0',
+            );
+
+            $mmawpg_settings_array['mmawpg_'.$method_id.'_max'] = array(
+                'type' => 'number',
+                'desc' => 'Max amount <br> <a style="color:red" href="https://codecanyon.net/item/minimum-and-maximum-amounts-for-woocommerce-payment-gateways/25130217" target="_blank">Upgrade to pro</a>',
+                //'id'   => 'mmawpg_'.$method_id.'_max',
+                'custom_attributes' => array(
+                    'min'   => '0',
+                    'disabled'=> 'disabled'
+                ),
+                'default' => '0',
+                'placeholder' => '0',
+            );
+            
+        }
+
+        $mmawpg_settings_array['mmawpg_method_section_end'] = array(
+             'type' => 'sectionend',
+             'id' => 'mmawpg_method_section_end_settings'
+        );
+
+        return $mmawpg_settings_array;
     }
 }
 
